@@ -490,6 +490,52 @@ The [Buildroot user manual](http://nightly.buildroot.org/manual.html) can be
 very helpful, especially if you need to add a package. The various Nerves system
 repositories have examples of many common use cases, so check them out as well.
 
+## Adding a custom Buildroot Package
+Adding a package to your target Buildroot system is done by patching the 
+buildroot source tree. This process is exactly the same as adding a package
+to vanallia Buildroot. You can see their official guide 
+[here](https://buildroot.org/downloads/manual/adding-packages-directory.txt).
+
+A Nerves System will need to contain at least the following in the root of 
+the custom system directory.
+
+1. `Config.in` - Includes each pacakge's `Config.in` file.
+2. `external.mk` - Inclues each package's `<package-name>.mk` file. 
+3. `packages` - Directory containing each package.
+
+Each direcory _inside_ the `packages` directory should contain two things:
+
+1. `Config.in` - Defines package information
+2. `<package-name>.mk` - Defines how a package is built.
+
+So if you wanted to build a package `libfoo`, you would edit the `Config.in`:
+
+```
+menu "Custom Packages"
+
+source "$NERVES_DEFCONFIG_DIR/packages/libfoo/Config.in"
+
+endmenu
+```
+
+Then edit `external.mk`:
+
+```
+include $(sort $(wildcard $(NERVES_DEFCONFIG_DIR)/packages/*/*.mk))
+```
+
+Now create the package directory and package files.
+
+```bash
+mkdir -p packages/libfoo
+touch packages/libfoo/Config.in
+touch packages/libfoo/libfoo.mk
+```
+
+At this point you can follow the Official Buildroot documentation to add your 
+custom package.
+
+
 ## Creating an Artifact
 
 Building a Nerves system can require a lot of system resources and often takes a
